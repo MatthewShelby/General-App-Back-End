@@ -49,10 +49,12 @@ namespace Doctors
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                options.EnableSensitiveDataLogging();
             }
             , ServiceLifetime.Transient);
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            //services.AddScoped(typeof(UserManager<IdentityUser>), typeof(UserManager<IdentityUser>));
 
 
             services.AddIdentity<IdentityUser, IdentityRole>()   //<<<<<< You have IdentityUser

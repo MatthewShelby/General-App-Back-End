@@ -132,8 +132,8 @@ namespace Doctors
                         //issue = DateTime.Now.AddMinutes(10),
                     };
 
-
-                    return await JsonH.SuccessAsync(user);
+                    System.Threading.Thread.Sleep(2000);
+                    return await JsonH.SuccessAsync(user.token);
 
                 };
 
@@ -144,6 +144,10 @@ namespace Doctors
                 if (result.IsLockedOut)
                 {
                     return await JsonH.ErrorAsync(new { id = "User is lockedOut." });
+                }
+                if (result.IsNotAllowed)
+                {
+                    return await JsonH.ErrorAsync("User is not allowed to sign in.");
                 }
                 else
                 {
@@ -158,6 +162,7 @@ namespace Doctors
         [HttpPost("register-user")]
         public async Task<IActionResult> RegisterNewUser([FromBody] InputModel Input)
         {
+            //System.Threading.Thread.Sleep(8000)
             if (ModelState.IsValid)
             {
                 var user = new IdentityUser { UserName = Input.Email, Email = Input.Email };
@@ -189,7 +194,7 @@ namespace Doctors
                     await emailSender.SendEmailAsync(Input.Email, "Account Activation.", "", link);
                     return await JsonH.SuccessAsync($"user id is: {user.Id}. code: {code}");
                 }
-                return await JsonH.ErrorAsync("Couldn't register the user. _userManager.CreateAsync +. result.error");
+                return await JsonH.ErrorAsync("Couldn't register the user. _userManager.CreateAsync " + result.Errors.First().Description.ToString());
             }
             return await JsonH.ErrorAsync("Model state is not valid.");
         }
@@ -243,25 +248,32 @@ namespace Doctors
 
         [AuthorizeAttribute]
         [HttpGet("who-am-i")]
-        public async Task<IActionResult> Test2()
+        public async Task<IActionResult> WhoAmI()
         {
-
-            var isu = HttpContext.Items["User"];
-            var ise = HttpContext.Items["userId"];
-            string exp = HttpContext.Items["userexp"].ToString();
-
-            var ssss = await _userManager.FindByIdAsync(ise.ToString());
-
-            //var ssdd = _userManager.FindByIdAsync("426d2f22-5284-4282-a28b-13d8ae7535d3");
-            CurrentUser cu = new CurrentUser()
+            try
             {
-                id = ssss.Id,
-                token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last().Replace("\"", ""),
-                email = ssss.Email,
-                expires = DateTime.Parse(exp)
-            };
+                var isu = HttpContext.Items["User"];
+                var ise = HttpContext.Items["userId"];
+                string exp = HttpContext.Items["userexp"].ToString();
 
-            return await JsonH.SuccessAsync(cu);
+                var ssss = await _userManager.FindByIdAsync(ise.ToString());
+
+                //var ssdd = _userManager.FindByIdAsync("426d2f22-5284-4282-a28b-13d8ae7535d3");
+                CurrentUser cu = new CurrentUser()
+                {
+                    id = ssss.Id,
+                    token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last().Replace("\"", ""),
+                    email = ssss.Email,
+                    expires = DateTime.Parse(exp)
+                };
+
+                //System.Threading.Thread.Sleep(2000);
+                return await JsonH.SuccessAsync(cu);
+            }
+            catch (Exception ex)
+            {
+                return await JsonH.ErrorAsync(ex.Message);
+            }
         }
 
 

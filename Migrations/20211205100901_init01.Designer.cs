@@ -4,14 +4,16 @@ using Doctors.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Doctors.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211205100901_init01")]
+    partial class init01
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,10 +41,6 @@ namespace Doctors.Migrations
 
                     b.Property<string>("LogoImageId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("OwnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProfileImageId")
                         .HasColumnType("nvarchar(450)");
@@ -155,6 +153,26 @@ namespace Doctors.Migrations
                     b.HasIndex("SerductId");
 
                     b.ToTable("SerductImages");
+                });
+
+            modelBuilder.Entity("Doctors.UsersCompany", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CompanyId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UsersCompanys");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -366,7 +384,7 @@ namespace Doctors.Migrations
 
             modelBuilder.Entity("Doctors.ContactInfo", b =>
                 {
-                    b.HasOne("Doctors.Company", "Company")
+                    b.HasOne("Doctors.Company", null)
                         .WithMany("ContactInfos")
                         .HasForeignKey("CompanyId");
                 });
@@ -383,6 +401,17 @@ namespace Doctors.Migrations
                     b.HasOne("Doctors.Serduct", null)
                         .WithMany("Images")
                         .HasForeignKey("SerductId");
+                });
+
+            modelBuilder.Entity("Doctors.UsersCompany", b =>
+                {
+                    b.HasOne("Doctors.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId");
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

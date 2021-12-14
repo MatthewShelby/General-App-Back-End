@@ -25,9 +25,16 @@ namespace Doctors.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+            
+
         }
 
-        public DbSet<ChatUser> ProductVisits { get; set; }
+        //public DbSet<UsersCompany> UsersCompany { get; set; } 
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<Serduct> Serducts { get; set; }
+        public DbSet<ContactInfo> ContactInfos { get; set; }
+        public DbSet<SerductImage> SerductImages { get; set; }
+        public DbSet<CompanyImage> CompanyImages { get; set; }
 
 
         #region disable cascading delete in database
@@ -42,6 +49,9 @@ namespace Doctors.Data
             {
                 fk.DeleteBehavior = DeleteBehavior.Restrict;
             }
+
+        //    modelBuilder.Entity<UsersCompany>()
+        //.HasNoKey();
 
             base.OnModelCreating(modelBuilder);
         }

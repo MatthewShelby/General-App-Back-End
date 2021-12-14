@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Doctors.Migrations
 {
-    public partial class ReBuild : Migration
+    public partial class init01 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -47,18 +47,17 @@ namespace Doctors.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductVisits",
+                name: "CompanyImages",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    IsDelete = table.Column<bool>(nullable: false),
-                    CreateDate = table.Column<DateTime>(nullable: false),
-                    LastUpdateDate = table.Column<DateTime>(nullable: false),
-                    Email = table.Column<string>(nullable: true)
+                    ImageType = table.Column<int>(nullable: false),
+                    Address = table.Column<string>(nullable: false),
+                    AltText = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductVisits", x => x.Id);
+                    table.PrimaryKey("PK_CompanyImages", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -167,6 +166,125 @@ namespace Doctors.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Companies",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    CompanyName = table.Column<string>(nullable: false),
+                    CompanyTitle = table.Column<string>(nullable: true),
+                    CompanyShortBio = table.Column<string>(nullable: true),
+                    CompanyLongBio = table.Column<string>(nullable: true),
+                    ProfileImageId = table.Column<string>(nullable: true),
+                    LogoImageId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Companies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Companies_CompanyImages_LogoImageId",
+                        column: x => x.LogoImageId,
+                        principalTable: "CompanyImages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Companies_CompanyImages_ProfileImageId",
+                        column: x => x.ProfileImageId,
+                        principalTable: "CompanyImages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ContactInfos",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
+                    Value = table.Column<string>(nullable: true),
+                    CompanyId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContactInfos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ContactInfos_Companies_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Companies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Serducts",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    SerductType = table.Column<int>(nullable: false),
+                    Title = table.Column<string>(nullable: true),
+                    Category = table.Column<string>(nullable: true),
+                    SubCategory = table.Column<string>(nullable: true),
+                    ShortDescription = table.Column<string>(nullable: true),
+                    LongDescription = table.Column<string>(nullable: true),
+                    CompanyId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Serducts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Serducts_Companies_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Companies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UsersCompanys",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: true),
+                    CompanyId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UsersCompanys", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UsersCompanys_Companies_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Companies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UsersCompanys_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SerductImages",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    ImageType = table.Column<int>(nullable: false),
+                    Address = table.Column<string>(nullable: false),
+                    AltText = table.Column<string>(nullable: false),
+                    SerductId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SerductImages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SerductImages_Serducts_SerductId",
+                        column: x => x.SerductId,
+                        principalTable: "Serducts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -205,6 +323,41 @@ namespace Doctors.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Companies_LogoImageId",
+                table: "Companies",
+                column: "LogoImageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Companies_ProfileImageId",
+                table: "Companies",
+                column: "ProfileImageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ContactInfos_CompanyId",
+                table: "ContactInfos",
+                column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SerductImages_SerductId",
+                table: "SerductImages",
+                column: "SerductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Serducts_CompanyId",
+                table: "Serducts",
+                column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UsersCompanys_CompanyId",
+                table: "UsersCompanys",
+                column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UsersCompanys_UserId",
+                table: "UsersCompanys",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -225,13 +378,28 @@ namespace Doctors.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "ProductVisits");
+                name: "ContactInfos");
+
+            migrationBuilder.DropTable(
+                name: "SerductImages");
+
+            migrationBuilder.DropTable(
+                name: "UsersCompanys");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Serducts");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Companies");
+
+            migrationBuilder.DropTable(
+                name: "CompanyImages");
         }
     }
 }

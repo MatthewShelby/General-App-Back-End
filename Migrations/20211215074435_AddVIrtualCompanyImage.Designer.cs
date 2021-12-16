@@ -4,14 +4,16 @@ using Doctors.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Doctors.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211215074435_AddVIrtualCompanyImage")]
+    partial class AddVIrtualCompanyImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,13 +62,14 @@ namespace Doctors.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CompanyId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("ImageType")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("CompanyImages");
                 });
@@ -345,6 +348,13 @@ namespace Doctors.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("Doctors.CompanyImage", b =>
+                {
+                    b.HasOne("Doctors.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId");
                 });
 
             modelBuilder.Entity("Doctors.ContactInfo", b =>

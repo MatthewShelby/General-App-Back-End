@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Doctors;
 using Doctors.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Doctors.Controllers
 {
@@ -21,13 +21,13 @@ namespace Doctors.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
 
+
         public CompaniesController(ApplicationDbContext context,
                 UserManager<IdentityUser> userManager
             )
         {
             _context = context;
             _userManager = userManager;
-
         }
 
         #endregion
@@ -47,17 +47,79 @@ namespace Doctors.Controllers
 
         [HttpGet("get-my-company")]
         public async Task<ActionResult<Company>> GetMyCompany()
-        {
-            System.Threading.Thread.Sleep(10);
-            var userId = HttpContext.Items["userId"];
-            var company = await _context.Companies.FirstOrDefaultAsync(c=>c.OwnerId == userId.ToString());
 
-            company.ContactInfos = _context.ContactInfos.Where(c=>c.Company.Id == company.Id).ToList();
+        {
+
+            //System.Threading.Thread.Sleep(10);
+            var userId = HttpContext.Items["userId"];
+            var company = _context.Companies.FirstOrDefault(c => c.OwnerId == userId.ToString());
+
+            company.ContactInfos = _context.ContactInfos.Where(c => c.Company.Id == company.Id).ToList();
+
+            CompanyImage comImgProf = new CompanyImage();
+            CompanyImage comImgLogo = new CompanyImage();
+
+            List<CompanyImage> CI = _context.CompanyImages.Where(i => i.CompanyId == company.Id).ToList();
+            if (CI.Any())
+            {
+                try
+                {
+                    comImgProf = CI.FirstOrDefault(i => i.ImageType == ImageType.catalog);
+
+                }
+                catch (Exception)
+                {
+
+                }
+                try
+                {
+                    comImgLogo = CI.FirstOrDefault(i => i.ImageType == ImageType.largehumbnail);
+
+                }
+                catch (Exception)
+                {
+
+                }
+
+            }
+
+            if (comImgProf!=null)
+            {
+                company.ProfileImage = new CompanyImage()
+                {
+                    Id = comImgProf.Id,
+                    Address = comImgProf.Address,
+                    AltText = comImgProf.AltText,
+                    ImageType = comImgProf.ImageType
+                };
+            }
+            if (comImgLogo!=null  )
+            {
+                company.ProfileImage = new CompanyImage()
+                {
+                    Id = comImgLogo.Id,
+                    Address = comImgLogo.Address,
+                    AltText = comImgLogo.AltText,
+                    ImageType = comImgLogo.ImageType
+                };
+            }
+
+            //company.LogoImage = CI.SingleOrDefault(i => i.ImageType == ImageType.largehumbnail);
+            //company.ProfileImage.Company = null;
+            //company.ProfileImage = new CompanyImage()
+            //{
+            //    Address = "C:\\C\\General-App-Back-End\\wwwroot\\Images\\companyProfile\\logo Stra.png",
+            //    AltText = "Alt text gen in server",
+            //    ImageType = ImageType.catalog,
+            //};
+
+
             if (company == null)
             {
                 return await JsonH.ErrorAsync("Company Not Found.");
             }
             return await JsonH.SuccessAsync(company);
+
         }
 
 

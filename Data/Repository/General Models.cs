@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace Doctors
@@ -31,8 +32,10 @@ namespace Doctors
 
         public string CompanyLongBio { get; set; }
 
-        public CompanyImage ProfileImage { get; set; }
+        [NotMapped]
+        public virtual CompanyImage ProfileImage { get; set; }
 
+        [NotMapped]
         public CompanyImage LogoImage { get; set; }
 
         public virtual ICollection<ContactInfo> ContactInfos { get; set; }
@@ -88,6 +91,10 @@ namespace Doctors
 
         [Key]
         public string Id { get; set; }
+
+        [Required]
+        public virtual string CompanyId { get; set; }
+
 
         [Required]
         public ImageType ImageType { get; set; }

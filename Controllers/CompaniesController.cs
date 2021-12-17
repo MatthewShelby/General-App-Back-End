@@ -45,6 +45,7 @@ namespace Doctors.Controllers
             return await JsonH.SuccessAsync(ss);
         }
 
+        
         [HttpGet("get-my-company")]
         public async Task<ActionResult<Company>> GetMyCompany()
 
@@ -54,75 +55,25 @@ namespace Doctors.Controllers
             var userId = HttpContext.Items["userId"];
             var company = _context.Companies.FirstOrDefault(c => c.OwnerId == userId.ToString());
 
+
             company.ContactInfos = _context.ContactInfos.Where(c => c.Company.Id == company.Id).ToList();
 
-            CompanyImage comImgProf = new CompanyImage();
-            CompanyImage comImgLogo = new CompanyImage();
+            company.Images = _context.CompanyImages.Where(c => c.CompanyId == company.Id).ToList();
 
-            List<CompanyImage> CI = _context.CompanyImages.Where(i => i.CompanyId == company.Id).ToList();
-            if (CI.Any())
-            {
-                try
-                {
-                    comImgProf = CI.FirstOrDefault(i => i.ImageType == ImageType.catalog);
+            company.Serducts = new List<Serduct>();
 
-                }
-                catch (Exception)
-                {
-
-                }
-                try
-                {
-                    comImgLogo = CI.FirstOrDefault(i => i.ImageType == ImageType.largehumbnail);
-
-                }
-                catch (Exception)
-                {
-
-                }
-
-            }
-
-            if (comImgProf!=null)
-            {
-                company.ProfileImage = new CompanyImage()
-                {
-                    Id = comImgProf.Id,
-                    Address = comImgProf.Address,
-                    AltText = comImgProf.AltText,
-                    ImageType = comImgProf.ImageType
-                };
-            }
-            if (comImgLogo!=null  )
-            {
-                company.ProfileImage = new CompanyImage()
-                {
-                    Id = comImgLogo.Id,
-                    Address = comImgLogo.Address,
-                    AltText = comImgLogo.AltText,
-                    ImageType = comImgLogo.ImageType
-                };
-            }
-
-            //company.LogoImage = CI.SingleOrDefault(i => i.ImageType == ImageType.largehumbnail);
-            //company.ProfileImage.Company = null;
-            //company.ProfileImage = new CompanyImage()
-            //{
-            //    Address = "C:\\C\\General-App-Back-End\\wwwroot\\Images\\companyProfile\\logo Stra.png",
-            //    AltText = "Alt text gen in server",
-            //    ImageType = ImageType.catalog,
-            //};
 
 
             if (company == null)
             {
+                return NotFound();
                 return await JsonH.ErrorAsync("Company Not Found.");
             }
             return await JsonH.SuccessAsync(company);
 
         }
 
-
+        
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompanies()

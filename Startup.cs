@@ -104,6 +104,11 @@ namespace Doctors
                         context.Token = accessToken;
                     }
                     return Task.CompletedTask;
+                },
+                OnAuthenticationFailed = c =>
+                {
+                    // break point here
+                    return Task.CompletedTask;
                 }
             };
         });

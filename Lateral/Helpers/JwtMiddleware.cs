@@ -33,7 +33,7 @@ namespace Doctors
 
             await _next(context);
         }
-
+        //((Microsoft.AspNetCore.Http.DefaultHttpContext)context).Session = '((Microsoft.AspNetCore.Http.DefaultHttpContext)context).Session' threw an exception of type 'System.InvalidOperationException'
         private void attachUserToContext(HttpContext context, UserManager<IdentityUser> userManager, string token)
         {
             try

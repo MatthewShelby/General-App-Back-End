@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Doctors.Controllers
@@ -35,25 +36,254 @@ namespace Doctors.Controllers
 
 
 
+        [HttpPost("upload-company-logo-image")]
+        public async Task<IActionResult> UploadCompanyLogoImage(IFormFile file,
+            [FromForm] string altText, [FromForm] string companyId)
+        {
+            // init CompanyImageEntity
+
+            string fileName = Guid.NewGuid().ToString() + "-" + Path.GetFileName(file.FileName);
+            string fileAccessPath = Path.Combine(_configuration["ServerAddress"], "Images\\companyLogo", fileName);
+
+            CompanyImage newCompanyImage = new CompanyImage()
+            {
+                Id = Guid.NewGuid().ToString(),
+                AltText = altText,
+                CompanyId = companyId,
+                CompanyImageType = CompanyImageType.logo,
+                Address = fileAccessPath
+            };
+
+
+            // write file
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images\\companyLogo", fileName);
+            try
+            {
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+            }
+            catch (Exception ex)
+            {
+                return await JsonH.ErrorAsync("Couldnt write the file. Error: " + ex.Message);
+            }
+
+
+            Company company = _context.Companies.Find(companyId);
+            company.Images = _context.CompanyImages.Where(c => c.CompanyId == company.Id).ToList();
+            if (company.Images == null)
+                company.Images = new List<CompanyImage>();
+            else
+            {
+                CompanyImage existingCompanyImage = company.Images.FirstOrDefault(i => i.CompanyImageType == CompanyImageType.logo);
+                if (existingCompanyImage != null)
+                {
+                    _context.CompanyImages.Remove(existingCompanyImage);
+                    company.Images.Remove(existingCompanyImage);
+                }
+            }
+            company.Images.Add(newCompanyImage);
+
+            _context.Entry(company).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return await JsonH.ErrorAsync(ex.Message);
+            }
+            return await JsonH.SuccessAsync(newCompanyImage.Address);
+
+        }
+
+
+        [HttpPost("upload-company-profile-image")]
+        public async Task<IActionResult> UploadCompanyProfileImage(IFormFile file,
+            [FromForm] string altText, [FromForm] string companyId)
+        {
+            // init CompanyImageEntity
+
+            string fileName = Guid.NewGuid().ToString() + "-" + Path.GetFileName(file.FileName);
+            string fileAccessPath = Path.Combine(_configuration["ServerAddress"], "Images\\companyProfile", fileName);
+
+            CompanyImage newCompanyImage = new CompanyImage()
+            {
+                Id = Guid.NewGuid().ToString(),
+                AltText = altText,
+                CompanyId = companyId,
+                CompanyImageType = CompanyImageType.profile,
+                Address = fileAccessPath
+            };
+
+
+            // write file
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images\\companyProfile", fileName);
+            try
+            {
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+            }
+            catch (Exception ex)
+            {
+                return await JsonH.ErrorAsync("Couldnt write the file. Error: " + ex.Message);
+            }
+
+
+            Company company = _context.Companies.Find(companyId);
+            company.Images = _context.CompanyImages.Where(c => c.CompanyId == company.Id).ToList();
+            if (company.Images == null)
+                company.Images = new List<CompanyImage>();
+            else
+            {
+                CompanyImage existingCompanyImage = company.Images.FirstOrDefault(i => i.CompanyImageType == CompanyImageType.profile);
+                if (existingCompanyImage != null)
+                {
+                    _context.CompanyImages.Remove(existingCompanyImage);
+                    company.Images.Remove(existingCompanyImage);
+                }
+            }
+            company.Images.Add(newCompanyImage);
+
+            _context.Entry(company).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return await JsonH.ErrorAsync(ex.Message);
+            }
+            return await JsonH.SuccessAsync(newCompanyImage.Address);
+
+        }
+
+
+
+
+
+
+        /*
+
         [HttpPost("upload-company-image")]
         public async Task<IActionResult> UploadCompanyImage(IFormFile file,
             [FromForm] string altText, [FromForm] string type, [FromForm] string companyId)
         {
-            var fileName = Path.GetFileName(file.FileName);
+            string idd = companyId;
+            var fileName = Guid.NewGuid().ToString() + "-" + Path.GetFileName(file.FileName);
 
-            string folder = "companyProfile";
+            string folder = (type == "logo") ? "companyLogo" : "companyProfile";
+
+
+            //save filePath to database
+            string fileAccessPath = Path.Combine(_configuration["ServerAddress"], $"Images\\{folder}", fileName);
+            Company comp = await _context.Companies.FirstOrDefaultAsync(S => S.Id == idd);
+
+
+            try
+            {
+                ICollection<CompanyImage> companyImageList = await _context.CompanyImages.ToListAsync();
+                CompanyImage existingCompanyProfileImage = companyImageList.FirstOrDefault(s => s.CompanyId == companyId && s.ImageType == ImageType.catalog);
+
+                if (existingCompanyProfileImage != null && type == "profile")
+                {
+                    _context.CompanyImages.Remove(existingCompanyProfileImage);
+                    //await _context.SaveChangesAsync();
+                }
+
+                CompanyImage existingCompanyLogoImage = companyImageList.FirstOrDefault(s => s.CompanyId == companyId && s.ImageType == ImageType.largeThumbnail);
+
+                if (existingCompanyLogoImage != null && type == "logo")
+                {
+                    _context.CompanyImages.Remove(existingCompanyLogoImage);
+                    //await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                return await JsonH.ErrorAsync("Delete error: " + ex.Message);
+            }
+
+            #region set images for company
+            CompanyImage comImgProf = new CompanyImage();
+            CompanyImage comImgLogo = new CompanyImage();
+
+            ICollection<CompanyImage> CI = _context.CompanyImages.Where(i => i.CompanyId == comp.Id).ToList();
+            if (CI.Any())
+            {
+                try
+                {
+                    comImgProf = CI.FirstOrDefault(i => i.ImageType == ImageType.catalog);
+
+                }
+                catch (Exception)
+                {
+
+                }
+                try
+                {
+                    comImgLogo = CI.FirstOrDefault(i => i.ImageType == ImageType.largeThumbnail);
+
+                }
+                catch (Exception)
+                {
+
+                }
+
+            }
+
+            if (comImgProf != null)
+            {
+                comp.ProfileImage = new CompanyImage()
+                {
+                    Id = comImgProf.Id,
+                    Address = comImgProf.Address,
+                    AltText = comImgProf.AltText,
+                    ImageType = comImgProf.ImageType
+                };
+            }
+            if (comImgLogo != null)
+            {
+                comp.ProfileImage = new CompanyImage()
+                {
+                    Id = comImgLogo.Id,
+                    Address = comImgLogo.Address,
+                    AltText = comImgLogo.AltText,
+                    ImageType = comImgLogo.ImageType
+                };
+            }
+            #endregion
+            CompanyImage newImage = new CompanyImage
+            {
+                Id = Guid.NewGuid().ToString(),
+                CompanyId = comp.Id,
+                Address = fileAccessPath,
+                AltText = altText,
+                ImageType = ImageType.catalog
+            };
+
+
+            //comp.LogoImage = newImage;
+
             if (type == "logo")
+            {
                 folder = "companyLogo";
+                newImage.ImageType = ImageType.largeThumbnail;
+                comp.LogoImage = newImage;
+            }
+            else { comp.ProfileImage = newImage; }
 
             string filePath = "";
             try
             {
-                filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", $"Images/{folder}", fileName);
+                filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", $"Images\\{folder}", fileName);
 
             }
             catch (Exception ex)
             {
-
                 return await JsonH.ErrorAsync(ex.Message);
             }
 
@@ -62,35 +292,28 @@ namespace Doctors.Controllers
                 await file.CopyToAsync(fileStream);
             }
 
-            //save filePath to database
-            string fileAccessPath = Path.Combine(_configuration["ServerAddress"], $"Images/{folder}", fileName);
-            Company comp = await _context.Companies.FirstOrDefaultAsync(S => S.Id == companyId);
-            CompanyImage newImage = new CompanyImage
-            {
-                Id = Guid.NewGuid().ToString(),
-                CompanyId = comp.Id,
-                Address = fileAccessPath,
-                AltText = altText
-            };
+
             _context.CompanyImages.Add(newImage);
-
-            if (type == "logo")
-            {
-                newImage.ImageType = ImageType.largehumbnail;
-                comp.LogoImage = newImage;
-            }
-            else
-            {
-                newImage.ImageType = ImageType.catalog;
-                comp.ProfileImage = (newImage);
-            }
-
+            _context.SaveChanges();
             _context.Entry(comp).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return JsonH.Success(new { address = filePath });
+            return JsonH.Success(newImage.Id);
         }
 
 
+        */
+        // GET recent Image
+        [HttpGet("get-company-image/{id}")]
+        public async Task<ActionResult<CompanyImage>> GetCompanyImage(string id)
+        {
+            var companyImage = await _context.CompanyImages.FindAsync(id);
+
+            if (companyImage == null)
+            {
+                return NotFound();
+            }
+
+            return companyImage;
+        }
 
 
         #region File upload

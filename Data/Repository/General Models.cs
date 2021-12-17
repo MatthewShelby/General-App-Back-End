@@ -32,11 +32,7 @@ namespace Doctors
 
         public string CompanyLongBio { get; set; }
 
-        [NotMapped]
-        public virtual CompanyImage ProfileImage { get; set; }
-
-        [NotMapped]
-        public CompanyImage LogoImage { get; set; }
+        public virtual ICollection<CompanyImage> Images { get; set; }
 
         public virtual ICollection<ContactInfo> ContactInfos { get; set; }
 
@@ -66,6 +62,7 @@ namespace Doctors
     {
         Service,
         Product,
+        other
     }
 
 
@@ -95,9 +92,12 @@ namespace Doctors
         [Required]
         public virtual string CompanyId { get; set; }
 
+        [JsonIgnore]
+        public virtual Company Company { get; set; }
+
 
         [Required]
-        public ImageType ImageType { get; set; }
+        public CompanyImageType CompanyImageType { get; set; }
 
         [Required]
         public string Address { get; set; }
@@ -107,10 +107,18 @@ namespace Doctors
 
     }
 
+
+    public enum CompanyImageType
+    {
+        logo,                   // 75*75
+        profile,                // 640*640
+        other
+    }
+
     public enum ImageType
     {
         smaillThumbnail,       // 50*50
-        largehumbnail,         // 75*75
+        largeThumbnail,        // 75*75
         card,                  // 255*255  -  220 * 280 would be great
         catalog,               // 640*640
         cover,                 // 400*1400

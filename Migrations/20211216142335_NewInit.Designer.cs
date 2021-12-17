@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doctors.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211208062505_RemoveUserCompany")]
-    partial class RemoveUserCompany
+    [Migration("20211216142335_NewInit")]
+    partial class NewInit
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -39,17 +39,11 @@ namespace Doctors.Migrations
                     b.Property<string>("CompanyTitle")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LogoImageId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProfileImageId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LogoImageId");
-
-                    b.HasIndex("ProfileImageId");
 
                     b.ToTable("Companies");
                 });
@@ -67,10 +61,16 @@ namespace Doctors.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ImageType")
+                    b.Property<int>("COmpanyImageType")
                         .HasColumnType("int");
 
+                    b.Property<string>("CompanyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("CompanyImages");
                 });
@@ -351,20 +351,18 @@ namespace Doctors.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("Doctors.Company", b =>
+            modelBuilder.Entity("Doctors.CompanyImage", b =>
                 {
-                    b.HasOne("Doctors.CompanyImage", "LogoImage")
-                        .WithMany()
-                        .HasForeignKey("LogoImageId");
-
-                    b.HasOne("Doctors.CompanyImage", "ProfileImage")
-                        .WithMany()
-                        .HasForeignKey("ProfileImageId");
+                    b.HasOne("Doctors.Company", "Company")
+                        .WithMany("Images")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Doctors.ContactInfo", b =>
                 {
-                    b.HasOne("Doctors.Company", null)
+                    b.HasOne("Doctors.Company", "Company")
                         .WithMany("ContactInfos")
                         .HasForeignKey("CompanyId");
                 });

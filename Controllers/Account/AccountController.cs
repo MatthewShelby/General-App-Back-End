@@ -254,21 +254,38 @@ namespace Doctors
             {
                 var isu = HttpContext.Items["User"];
                 var ise = HttpContext.Items["userId"];
+                if (ise== null)
+                {
+                    return await JsonH.ErrorAsync("Null User Id");
+                }
                 string exp = HttpContext.Items["userexp"].ToString();
 
                 var ssss = await _userManager.FindByIdAsync(ise.ToString());
-
-                //var ssdd = _userManager.FindByIdAsync("426d2f22-5284-4282-a28b-13d8ae7535d3");
-                CurrentUser cu = new CurrentUser()
+                if (ssss == null)
                 {
-                    id = ssss.Id,
-                    token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last().Replace("\"", ""),
-                    email = ssss.Email,
-                    expires = DateTime.Parse(exp)
-                };
+                    return await JsonH.ErrorAsync("Null User Account");
+                }
+                try
+                {
+
+
+                    //var ssdd = _userManager.FindByIdAsync("426d2f22-5284-4282-a28b-13d8ae7535d3");
+                    CurrentUser cu = new CurrentUser()
+                    {
+                        id = ssss.Id,
+                        token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last().Replace("\"", ""),
+                        email = ssss.Email,
+                        expires = DateTime.Parse(exp)
+                    };
+                    return await JsonH.SuccessAsync(cu);
+                }
+                catch (Exception ex)
+                {
+
+                    return await JsonH.ErrorAsync(ex.Message);
+                }
 
                 //System.Threading.Thread.Sleep(2000);
-                return await JsonH.SuccessAsync(cu);
             }
             catch (Exception ex)
             {

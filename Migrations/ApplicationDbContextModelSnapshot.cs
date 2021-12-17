@@ -59,14 +59,16 @@ namespace Doctors.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CompanyId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ImageType")
+                    b.Property<int>("COmpanyImageType")
                         .HasColumnType("int");
 
+                    b.Property<string>("CompanyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("CompanyImages");
                 });
@@ -345,6 +347,15 @@ namespace Doctors.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("Doctors.CompanyImage", b =>
+                {
+                    b.HasOne("Doctors.Company", "Company")
+                        .WithMany("Images")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Doctors.ContactInfo", b =>

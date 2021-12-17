@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Doctors.Migrations
 {
-    public partial class init01 : Migration
+    public partial class NewInit : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -47,17 +47,19 @@ namespace Doctors.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CompanyImages",
+                name: "Companies",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    ImageType = table.Column<int>(nullable: false),
-                    Address = table.Column<string>(nullable: false),
-                    AltText = table.Column<string>(nullable: false)
+                    OwnerId = table.Column<string>(nullable: false),
+                    CompanyName = table.Column<string>(nullable: false),
+                    CompanyTitle = table.Column<string>(nullable: true),
+                    CompanyShortBio = table.Column<string>(nullable: true),
+                    CompanyLongBio = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CompanyImages", x => x.Id);
+                    table.PrimaryKey("PK_Companies", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -167,32 +169,24 @@ namespace Doctors.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Companies",
+                name: "CompanyImages",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    CompanyName = table.Column<string>(nullable: false),
-                    CompanyTitle = table.Column<string>(nullable: true),
-                    CompanyShortBio = table.Column<string>(nullable: true),
-                    CompanyLongBio = table.Column<string>(nullable: true),
-                    ProfileImageId = table.Column<string>(nullable: true),
-                    LogoImageId = table.Column<string>(nullable: true)
+                    CompanyId = table.Column<string>(nullable: false),
+                    COmpanyImageType = table.Column<int>(nullable: false),
+                    Address = table.Column<string>(nullable: false),
+                    AltText = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Companies", x => x.Id);
+                    table.PrimaryKey("PK_CompanyImages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Companies_CompanyImages_LogoImageId",
-                        column: x => x.LogoImageId,
-                        principalTable: "CompanyImages",
+                        name: "FK_CompanyImages_Companies_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Companies",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Companies_CompanyImages_ProfileImageId",
-                        column: x => x.ProfileImageId,
-                        principalTable: "CompanyImages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -200,9 +194,9 @@ namespace Doctors.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
+                    CompanyId = table.Column<string>(nullable: true),
                     Type = table.Column<int>(nullable: false),
-                    Value = table.Column<string>(nullable: true),
-                    CompanyId = table.Column<string>(nullable: true)
+                    Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -235,31 +229,6 @@ namespace Doctors.Migrations
                         name: "FK_Serducts_Companies_CompanyId",
                         column: x => x.CompanyId,
                         principalTable: "Companies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UsersCompanys",
-                columns: table => new
-                {
-                    Id = table.Column<string>(nullable: false),
-                    UserId = table.Column<string>(nullable: true),
-                    CompanyId = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UsersCompanys", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UsersCompanys_Companies_CompanyId",
-                        column: x => x.CompanyId,
-                        principalTable: "Companies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_UsersCompanys_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -325,14 +294,9 @@ namespace Doctors.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Companies_LogoImageId",
-                table: "Companies",
-                column: "LogoImageId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Companies_ProfileImageId",
-                table: "Companies",
-                column: "ProfileImageId");
+                name: "IX_CompanyImages_CompanyId",
+                table: "CompanyImages",
+                column: "CompanyId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ContactInfos_CompanyId",
@@ -348,16 +312,6 @@ namespace Doctors.Migrations
                 name: "IX_Serducts_CompanyId",
                 table: "Serducts",
                 column: "CompanyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UsersCompanys_CompanyId",
-                table: "UsersCompanys",
-                column: "CompanyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UsersCompanys_UserId",
-                table: "UsersCompanys",
-                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -378,28 +332,25 @@ namespace Doctors.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "CompanyImages");
+
+            migrationBuilder.DropTable(
                 name: "ContactInfos");
 
             migrationBuilder.DropTable(
                 name: "SerductImages");
 
             migrationBuilder.DropTable(
-                name: "UsersCompanys");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "Serducts");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Companies");
+                name: "Serducts");
 
             migrationBuilder.DropTable(
-                name: "CompanyImages");
+                name: "Companies");
         }
     }
 }

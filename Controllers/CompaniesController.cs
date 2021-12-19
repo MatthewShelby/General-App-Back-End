@@ -59,8 +59,17 @@ namespace Doctors.Controllers
             company.ContactInfos = _context.ContactInfos.Where(c => c.Company.Id == company.Id).ToList();
 
             company.Images = _context.CompanyImages.Where(c => c.CompanyId == company.Id).ToList();
-
+            
             company.Serducts = new List<Serduct>();
+            try
+            {
+                company.Serducts = _context.Serducts.Where(s=>s.CompanyId == company.Id).ToList();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
 
 
 

@@ -47,6 +47,12 @@ namespace Doctors
         public string Id { get; set; }
 
         [Required]
+        public string CompanyId { get; set; }
+
+        [JsonIgnore]
+        public Company Company { get; set; }
+
+        [Required]
         public SerductType SerductType { get; set; }
 
         public string Title { get; set; }
@@ -81,6 +87,12 @@ namespace Doctors
         [Required]
         public string AltText { get; set; }
 
+
+        [Required]
+        public string SerductId { get; set; }
+
+        [JsonIgnore]
+        public Serduct Serduct { get; set; }
     }
 
     public class CompanyImage

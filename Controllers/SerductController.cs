@@ -29,8 +29,8 @@ namespace Doctors.Controllers
             return new  JsonResult(new {  data = serducts });
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Serduct>> GetSerduct(string id)
+        [HttpGet("get-serduct-by-id/{id}")]
+        public async Task<ActionResult<Serduct>> GetSerductBtId(string id)
         {
             var serduct = await _context.Serducts.FindAsync(id);
 

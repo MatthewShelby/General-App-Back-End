@@ -6,13 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace Doctors
 {
-    //public class UsersCompany
-    //{
-    //    public string UserId { get; set; }
-
-    //    public string CompanyId { get; set; }
-    //}
-
+    // There are server objects.
+    // There must be a Data Transfer Object for each of which these to be used when sending 
+    // data to the client.
     public class Company
     {
         [Key]
